@@ -41,10 +41,10 @@ public class Cultivo {
     @JoinColumn(name = "sector_id", nullable = false)
     private Sector sector;
 
-    // Las fechas son texto dd/MM/yyyy, igual que en la app
-    private String fechaSiembra = "";
+    // Fechas SQL DATE; el servicio conserva el formato del DTO Android.
+    private java.time.LocalDate fechaSiembra;
 
-    private String fechaCosechaEstimada = "";
+    private java.time.LocalDate fechaCosechaEstimada;
 
     @Column(nullable = false)
     private Integer frecuenciaRiegoDias = 1;

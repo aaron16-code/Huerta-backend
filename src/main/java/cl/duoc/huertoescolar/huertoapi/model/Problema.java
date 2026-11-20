@@ -27,9 +27,11 @@ public class Problema {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "sector_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sector_id")
     private Sector sector;
+
+    public Sector sectorEfectivo() { return cultivo == null ? sector : cultivo.getSector(); }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cultivo_id")

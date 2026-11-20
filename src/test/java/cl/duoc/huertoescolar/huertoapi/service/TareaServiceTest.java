@@ -35,6 +35,7 @@ class TareaServiceTest {
     @Mock private SectorRepository sectores;
     @Mock private CultivoRepository cultivos;
     @Mock private UsuarioRepository usuarios;
+    @Mock private Grupos grupos;
     @InjectMocks private TareaService servicio;
 
     private Sector sector(int id) {
@@ -119,6 +120,8 @@ class TareaServiceTest {
         when(sectores.findById(1)).thenReturn(Optional.of(sector(1)));
         when(usuarios.findById(1)).thenReturn(Optional.of(usuario(1)));
         when(repositorio.save(any(Tarea.class))).thenAnswer(inv -> inv.getArgument(0));
+        var grupo=new cl.duoc.huertoescolar.huertoapi.model.Grupo(); grupo.setNombre("Taller Huerto A");
+        when(grupos.resolver("Taller Huerto A")).thenReturn(grupo);
 
         TareaDto guardada = servicio.crear(dto(1, null, null, "Taller Huerto A", EstadoTarea.VALIDADA, null, null));
 
@@ -160,7 +163,9 @@ class TareaServiceTest {
         when(sectores.findById(1)).thenReturn(Optional.of(sector(1)));
         when(usuarios.findById(1)).thenReturn(Optional.of(usuario(1)));
         when(repositorio.save(any(Tarea.class))).thenAnswer(inv -> inv.getArgument(0));
-        TareaDto cambios = dto(1, null, null, "Taller Huerto A", EstadoTarea.RECHAZADA, null, "Falta la foto");
+        var grupo=new cl.duoc.huertoescolar.huertoapi.model.Grupo(); grupo.setNombre("Taller Huerto A");
+        when(grupos.resolver("Taller Huerto A")).thenReturn(grupo);
+        TareaDto cambios = dto(1, null, null, "Taller Huerto A", EstadoTarea.RECHAZADA, 1, "Falta la foto");
 
         TareaDto resultado = servicio.actualizar(3, cambios);
 
@@ -200,5 +205,23 @@ class TareaServiceTest {
     void listar_por_estudiante_filtra_por_responsable() {
         when(repositorio.findByResponsable_IdOrderById(2)).thenReturn(List.of(tareaExistente()));
         assertEquals(1, servicio.listar(null, 2).size());
+    }
+    @Test
+    void crear_con_ambas_asignaciones_da_error() {
+        assertThrows(ResponseStatusException.class, () -> servicio.crear(dto(1,null,2,"Taller Huerto A",null,null,null)));
+        verify(repositorio, never()).save(any());
+    }
+    @Test
+    void crear_con_cultivo_no_duplica_sector() {
+        Sector sector=sector(1);
+        Cultivo cultivo=new Cultivo(); cultivo.setId(5); cultivo.setSector(sector);
+        when(sectores.findById(1)).thenReturn(Optional.of(sector));
+        when(cultivos.findById(5)).thenReturn(Optional.of(cultivo));
+        when(usuarios.findById(1)).thenReturn(Optional.of(usuario(1)));
+        when(usuarios.findById(2)).thenReturn(Optional.of(usuario(2)));
+        when(repositorio.save(any(Tarea.class))).thenAnswer(inv -> {
+            Tarea t=inv.getArgument(0); assertNull(t.getSector()); return t;
+        });
+        assertEquals(1,servicio.crear(dto(1,5,2,null,null,null,null)).sectorId());
     }
 }
