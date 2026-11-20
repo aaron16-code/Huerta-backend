@@ -67,17 +67,24 @@ public class CultivoService {
         cultivo.setSector(sector);
         cultivo.setNombre(dto.nombre().trim());
         cultivo.setDescripcion(dto.descripcion() == null ? "" : dto.descripcion());
-        cultivo.setFechaSiembra(dto.fechaSiembra() == null ? "" : dto.fechaSiembra());
-        cultivo.setFechaCosechaEstimada(dto.fechaCosechaEstimada() == null ? "" : dto.fechaCosechaEstimada());
+        cultivo.setFechaSiembra(fecha(dto.fechaSiembra()));
+        cultivo.setFechaCosechaEstimada(fecha(dto.fechaCosechaEstimada()));
+        if(cultivo.getFechaSiembra()!=null && cultivo.getFechaCosechaEstimada()!=null && cultivo.getFechaCosechaEstimada().isBefore(cultivo.getFechaSiembra())) throw invalido("La cosecha no puede preceder la siembra");
         cultivo.setFrecuenciaRiegoDias(dto.frecuenciaRiegoDias());
         cultivo.setEstado(dto.estado() == null ? EstadoCultivo.PLANIFICADO : dto.estado());
         cultivo.setObservaciones(dto.observaciones() == null ? "" : dto.observaciones());
         cultivo.setFotoUri(dto.fotoUri());
     }
 
+    private static final java.time.format.DateTimeFormatter FORMATO=java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(java.time.format.ResolverStyle.STRICT);
+    private java.time.LocalDate fecha(String valor) {
+        if(valor==null || valor.isBlank()) return null;
+        try { return java.time.LocalDate.parse(valor,FORMATO); } catch(java.time.format.DateTimeParseException e) { throw invalido("Fecha inválida: use dd/MM/yyyy"); }
+    }
+    private String texto(java.time.LocalDate fecha) {return fecha==null?"":fecha.format(FORMATO);}
     private CultivoDto aDto(Cultivo c) {
         return new CultivoDto(c.getId(), c.getNombre(), c.getDescripcion(), c.getSector().getId(),
-                c.getFechaSiembra(), c.getFechaCosechaEstimada(), c.getFrecuenciaRiegoDias(),
+                texto(c.getFechaSiembra()), texto(c.getFechaCosechaEstimada()), c.getFrecuenciaRiegoDias(),
                 c.getEstado(), c.getObservaciones(), c.getFotoUri());
     }
 }

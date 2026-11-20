@@ -16,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UsuarioService {
 
+    private final Grupos grupos;
     private final UsuarioRepository repositorio;
 
-    public UsuarioService(UsuarioRepository repositorio) {
+    public UsuarioService(UsuarioRepository repositorio, Grupos grupos) {
         this.repositorio = repositorio;
+        this.grupos = grupos;
     }
 
     @Transactional(readOnly = true)
@@ -65,10 +67,10 @@ public class UsuarioService {
     private void aplicar(Usuario usuario, UsuarioDto dto) {
         usuario.setNombre(dto.nombre().trim());
         usuario.setRol(dto.rol());
-        usuario.setGrupo(dto.grupo() == null ? "" : dto.grupo().trim());
+        usuario.setGrupo(dto.grupo()==null || dto.grupo().isBlank()?null:grupos.resolver(dto.grupo()));
     }
 
     private UsuarioDto aDto(Usuario u) {
-        return new UsuarioDto(u.getId(), u.getNombre(), u.getRol(), u.getGrupo());
+        return new UsuarioDto(u.getId(), u.getNombre(), u.getRol(), u.getGrupo()==null?"":u.getGrupo().getNombre());
     }
 }

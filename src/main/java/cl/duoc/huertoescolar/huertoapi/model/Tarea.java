@@ -38,9 +38,11 @@ public class Tarea {
     private String instrucciones;
 
     // N tareas -> 1 sector (obligatorio)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "sector_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sector_id")
     private Sector sector;
+
+    public Sector sectorEfectivo() { return cultivo == null ? sector : cultivo.getSector(); }
 
     // N tareas -> 1 cultivo (opcional)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -58,7 +60,9 @@ public class Tarea {
     private Usuario responsable;
 
     // ...o un grupo completo
-    private String grupoAsignado;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="grupo_asignado_id")
+    private Grupo grupoAsignado;
 
     // Quien creó la tarea (obligatorio)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -75,18 +79,15 @@ public class Tarea {
     @JoinColumn(name = "realizada_por_id")
     private Usuario realizadaPor;
 
-    @Column(length = 1000)
-    private String fotoUri;
 
-    @Column(length = 1000)
-    private String comentarioEstudiante = "";
 
-    @Column(length = 1000)
-    private String comentarioDocente = "";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "validador_id")
-    private Usuario validador;
-
-    private Long fechaValidacion;
+    @jakarta.persistence.OneToMany(mappedBy="tarea", cascade=jakarta.persistence.CascadeType.ALL)
+    @jakarta.persistence.OrderBy("id ASC")
+    private java.util.List<Evidencia> evidencias = new java.util.ArrayList<>();
+    @jakarta.persistence.OneToMany(mappedBy="tarea", cascade=jakarta.persistence.CascadeType.ALL)
+    @jakarta.persistence.OrderBy("id ASC")
+    private java.util.List<Validacion> validaciones = new java.util.ArrayList<>();
+    public Evidencia ultimaEvidencia() { return evidencias.isEmpty()?null:evidencias.get(evidencias.size()-1); }
+    public Validacion ultimaValidacion() { return validaciones.isEmpty()?null:validaciones.get(validaciones.size()-1); }
 }

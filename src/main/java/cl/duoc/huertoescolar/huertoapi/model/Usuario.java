@@ -34,8 +34,9 @@ public class Usuario {
     @Column(nullable = false, length = 20)
     private Rol rol;
 
-    @Column(nullable = false)
-    private String grupo = "";
+    @jakarta.persistence.ManyToOne(fetch=jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name="grupo_id")
+    private Grupo grupo;
 
     // 1 usuario -> N tareas que tiene asignadas
     @OneToMany(mappedBy = "responsable")

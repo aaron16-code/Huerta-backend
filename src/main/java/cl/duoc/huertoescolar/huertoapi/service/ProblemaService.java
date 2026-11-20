@@ -97,7 +97,7 @@ public class ProblemaService {
         Usuario reportadoPor = usuarios.findById(dto.reportadoPorId())
                 .orElseThrow(() -> invalido("No existe el usuario " + dto.reportadoPorId()));
 
-        problema.setSector(sector);
+        problema.setSector(cultivo == null ? sector : null);
         problema.setCultivo(cultivo);
         problema.setReportadoPor(reportadoPor);
         problema.setTipo(dto.tipo());
@@ -115,7 +115,7 @@ public class ProblemaService {
 
     private ProblemaDto aDto(Problema p) {
         Integer cultivoId = p.getCultivo() == null ? null : p.getCultivo().getId();
-        return new ProblemaDto(p.getId(), p.getSector().getId(), cultivoId, p.getTipo(), p.getDescripcion(),
+        return new ProblemaDto(p.getId(), p.sectorEfectivo().getId(), cultivoId, p.getTipo(), p.getDescripcion(),
                 p.getFechaReporte(), p.getReportadoPor().getId(), p.getFotoUri(), p.getEstado(),
                 p.getComentarioDocente(), p.getFechaCierre());
     }
